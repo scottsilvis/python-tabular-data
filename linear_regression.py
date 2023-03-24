@@ -2,20 +2,61 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
 
-def linear_regression(x, y, x_lab, y_lab, output, path = "iris.csv"): # Function to perform linear regression on the data
-    dataframe = pd.read_csv("iris.csv")
-    x = dataframe.petal_length_cm
-    y = dataframe.sepal_length_cm
-    regression = stats.linregress(x, y)
-    slope = regression.slope
-    intercept = regression.intercept
-    plt.scatter(x, y, label = 'Data')
-    plt.plot(x, slope * x + intercept, color = "orange", label = 'Fitted line')
-    plt.xlabel(x_lab)
-    plt.ylabel(y_lab)
-    plt.legend()
-    plt.savefig(output)
-    quit()
+def linear_regression(x = "petal_length_cm",
+                      y = "sepal_length_cm", 
+                      x_lab = "Petal Length (cm)",
+                      y_lab = "Sepal Length (cm)", 
+                      output = "linear_regression.png", 
+                      group = "species",
+                      path = "iris.csv"): # Function to perform linear regression on the data
+    
+    try:
+        dataframe = pd.read_csv(path)
+    except FileNotFoundError:
+        print("Error: File not found")
+        return
+    except pd.errors.EmptyDataError:
+        print("Error: Empty dataframe")
+        return
+    except pd.errors.ParserError:
+        print("Error: Could not parse the file")
+        return
+    except Exception as e:
+        print("Error:", e)
+        return
+    
+    print("\nreading data from ", path)
+    
+    if group not in dataframe.columns:
+        print("Error: Column not found")
+        return
+    
+    for i in dataframe[group].unique():
+        print("\nplotting ", i)
+        x_data = dataframe[dataframe[group] == i][x]
+        y_data = dataframe[dataframe[group] == i][y]
+        
+        if x_data.empty or y_data.empty:
+            print("Error: Empty data")
+            continue
+
+        regression = stats.linregress(x_data, y_data)
+        slope = regression.slope
+        intercept = regression.intercept
+
+        plt.scatter(x_data, y_data, label = i)
+        plt.plot(x_data, slope * x_data + intercept, label = 'Fitted line')
+        plt.xlabel(x_lab)
+        plt.ylabel(y_lab)
+        print("\nx axis label: ", x_lab)
+        print("\ny axis label: ", y_lab)
+        plt.legend()
+        save = output + "_" + i + ".png"
+        print("\nsaving plot to ", save)
+        plt.savefig(save)
+        print("\nplot saved!")
+
+    print("\nAll plots generated!")
 
 def main(): # Function to call the linear regression function
     import argparse
@@ -26,21 +67,31 @@ def main(): # Function to call the linear regression function
     # Tell the parser what command-line arguments this script can receive
     parser.add_argument("-x", 
                         help="The x-axis data", 
+                        default="petal_length_cm",
                         required=False)
     parser.add_argument("-y", 
                         help="The y-axis data", 
+                        default="sepal_length_cm",
                         required=False)
     parser.add_argument("-x_lab",
                         help="The x-axis label",
+                        default="Petal Length (cm)",
                         required=False)
     parser.add_argument("-y_lab",
                         help="The y-axis label",
+                        default="Sepal Length (cm)",
                         required=False)
     parser.add_argument("-output",
                         help="The output file",
+                        default="linear_regression",
+                        required=False)
+    parser.add_argument("-group",
+                        help="The group to plot",
+                        default="species",
                         required=False)
     parser.add_argument("-path",
                         help="The path to the data file",
+                        default="iris.csv",
                         required=False)
 
     # Parse the command-line arguments into a 'dict'-like container
@@ -52,6 +103,7 @@ def main(): # Function to call the linear regression function
             args.x_lab,
             args.y_lab,
             args.output,
+            args.group,
             args.path)
 
 if __name__ == "__main__":
