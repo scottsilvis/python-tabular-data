@@ -6,9 +6,29 @@ def linear_regression(x = "petal_length_cm",
                       y = "sepal_length_cm", 
                       x_lab = "Petal Length (cm)",
                       y_lab = "Sepal Length (cm)", 
-                      output = "linear_regression.png", 
+                      output = "linear_regression", 
                       group = "species",
                       path = "iris.csv"): # Function to perform linear regression on the data
+    
+    """Perform linear regression and create a graph containing slope and trendline.
+
+    Parameters
+    ----------
+    x : str
+        The x-axis data
+    y : str
+        The y-axis data
+    x_lab : str
+        The x-axis label
+    y_lab : str
+        The y-axis label
+    output : str
+        The output file
+    group : str
+        The group to plot
+    path : str
+        The path to the data file #Should I include a second path to an excel file that contains x_lab and y_lab?
+    """
     
     try:
         dataframe = pd.read_csv(path)
@@ -28,8 +48,24 @@ def linear_regression(x = "petal_length_cm",
     print("\nreading data from ", path)
     
     if group not in dataframe.columns:
-        print("Error: Column not found")
-        return
+        print("Group not found in dataframe. Plotting all data.")
+        x_data = dataframe[dataframe][x]
+        y_data = dataframe[dataframe][y]
+        regression = stats.linregress(x_data, y_data)
+        slope = regression.slope
+        intercept = regression.intercept
+
+        plt.scatter(x_data, y_data, label = i)
+        plt.plot(x_data, slope * x_data + intercept, label = 'Fitted line')
+        plt.xlabel(x_lab)
+        plt.ylabel(y_lab)
+        print("\nx axis label: ", x_lab)
+        print("\ny axis label: ", y_lab)
+        plt.legend()
+        save = output + ".png"
+        print("\nsaving plot to ", save)
+        plt.savefig(save)
+        print("\nplot saved!")
     
     for i in dataframe[group].unique():
         print("\nplotting ", i)
