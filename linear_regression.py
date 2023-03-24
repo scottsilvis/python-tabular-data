@@ -105,6 +105,7 @@ def linear_regression(x = "petal_length_cm",
             print("\nsaving plot to ", save)
             plt.savefig(save)
             print("\nplot saved!")
+            plt.clf()
 
         print("\nAll plots generated!")
 
