@@ -28,8 +28,21 @@ def linear_regression(x = "petal_length_cm",
         The group to plot
     path : str
         The path to the data file #Should I include a second path to an excel file that contains x_lab and y_lab?
+
+    Returns
+    -------
+    slopes : list
+        A list of the slopes of the linear regression for each group.
+    intercepts : list
+        A list of the intercepts of the linear regression for each group.
+    r_values : list
+        A list of the correlation coefficients for each group.
+    p_values : list
+        A list of the p-values for each group.
+    stderrs : list
+        A list of the standard errors for each group.
     """
-    
+
     try:
         dataframe = pd.read_csv(path)
     except FileNotFoundError:
@@ -48,14 +61,14 @@ def linear_regression(x = "petal_length_cm",
     print("\nreading data from ", path)
     
     if group not in dataframe.columns:
-        print("Group not found in dataframe. Plotting all data.")
-        x_data = dataframe[dataframe][x]
-        y_data = dataframe[dataframe][y]
+        print("\nGroup not found in dataframe. Plotting all data.")
+        x_data = dataframe[x]
+        y_data = dataframe[y]
         regression = stats.linregress(x_data, y_data)
         slope = regression.slope
         intercept = regression.intercept
 
-        plt.scatter(x_data, y_data, label = i)
+        plt.scatter(x_data, y_data)
         plt.plot(x_data, slope * x_data + intercept, label = 'Fitted line')
         plt.xlabel(x_lab)
         plt.ylabel(y_lab)
@@ -67,32 +80,33 @@ def linear_regression(x = "petal_length_cm",
         plt.savefig(save)
         print("\nplot saved!")
     
-    for i in dataframe[group].unique():
-        print("\nplotting ", i)
-        x_data = dataframe[dataframe[group] == i][x]
-        y_data = dataframe[dataframe[group] == i][y]
-        
-        if x_data.empty or y_data.empty:
-            print("Error: Empty data")
-            continue
+    if group in dataframe.columns:
+        for i in dataframe[group].unique():
+            print("\nplotting ", i)
+            x_data = dataframe[dataframe[group] == i][x]
+            y_data = dataframe[dataframe[group] == i][y]
+            
+            if x_data.empty or y_data.empty:
+                print("Error: Empty data")
+                continue
 
-        regression = stats.linregress(x_data, y_data)
-        slope = regression.slope
-        intercept = regression.intercept
+            regression = stats.linregress(x_data, y_data)
+            slope = regression.slope
+            intercept = regression.intercept
 
-        plt.scatter(x_data, y_data, label = i)
-        plt.plot(x_data, slope * x_data + intercept, label = 'Fitted line')
-        plt.xlabel(x_lab)
-        plt.ylabel(y_lab)
-        print("\nx axis label: ", x_lab)
-        print("\ny axis label: ", y_lab)
-        plt.legend()
-        save = output + "_" + i + ".png"
-        print("\nsaving plot to ", save)
-        plt.savefig(save)
-        print("\nplot saved!")
+            plt.scatter(x_data, y_data, label = i)
+            plt.plot(x_data, slope * x_data + intercept, label = 'Fitted line')
+            plt.xlabel(x_lab)
+            plt.ylabel(y_lab)
+            print("\nx axis label: ", x_lab)
+            print("\ny axis label: ", y_lab)
+            plt.legend()
+            save = output + "_" + i + ".png"
+            print("\nsaving plot to ", save)
+            plt.savefig(save)
+            print("\nplot saved!")
 
-    print("\nAll plots generated!")
+        print("\nAll plots generated!")
 
 def main(): # Function to call the linear regression function
     import argparse
@@ -123,7 +137,7 @@ def main(): # Function to call the linear regression function
                         required=False)
     parser.add_argument("-group",
                         help="The group to plot",
-                        default="species",
+                        #default="species",
                         required=False)
     parser.add_argument("-path",
                         help="The path to the data file",
